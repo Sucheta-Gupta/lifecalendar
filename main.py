@@ -10,19 +10,19 @@ WIDTH = 1290
 HEIGHT = 2796
 COLUMNS = 15
 ROWS = 25
-DOT_RADIUS = 15  # slightly bigger
+DOT_RADIUS = 15  # slightly bigger dots
 GRID_WIDTH = 900
 GRID_HEIGHT = 1500
 
 # Move grid down by 1 row
 GRID_X = (WIDTH - GRID_WIDTH) / 2
-GRID_Y = (HEIGHT - GRID_HEIGHT) / 2 + GRID_HEIGHT / ROWS  # move down by 1 row height
+GRID_Y = (HEIGHT - GRID_HEIGHT) / 2 + GRID_HEIGHT / ROWS  # shift down one row
 
-# Font setup (Pillow default if no .ttf available)
+# Font for bottom text
 try:
-    FONT = ImageFont.truetype("Arial.ttf", 50)
+    TEXT_FONT = ImageFont.truetype("Arial.ttf", 80)  # larger font for visibility
 except:
-    FONT = ImageFont.load_default()
+    TEXT_FONT = ImageFont.load_default()
 
 
 @app.get("/calendar")
@@ -37,6 +37,7 @@ def life_calendar():
     h_spacing = GRID_WIDTH / (COLUMNS - 1)
     v_spacing = GRID_HEIGHT / (ROWS - 1)
 
+    # Draw the dots
     for i in range(ROWS):
         for j in range(COLUMNS):
             dot_index = i * COLUMNS + j
@@ -48,29 +49,35 @@ def life_calendar():
 
             color = (100, 100, 100)  # grey dot
             if dot_index + 1 == day_of_year:
-                color = (255, 0, 0)  # red dot for today
+                color = (255, 0, 0)  # today red dot
 
             draw.ellipse(
                 [x - DOT_RADIUS, y - DOT_RADIUS, x + DOT_RADIUS, y + DOT_RADIUS],
                 fill=color
             )
 
-    # Add bottom text: "Xd left • Y%"
+    # Bottom text: "Xd left • Y%"
     days_left = 365 - day_of_year
     percent_done = int(day_of_year / 365 * 100)
-    text = f"{days_left}d left • {percent_done}%"
+    text_left = f"{days_left}d left"
+    text_percent = f" • {percent_done}%"
 
-    # Measure text size for center alignment
-    bbox = draw.textbbox((0, 0), text, font=FONT)  # returns (x0, y0, x1, y1)
-    text_width = bbox[2] - bbox[0]
-    text_height = bbox[3] - bbox[1]
+    # Measure text widths for center alignment
+    bbox_left = draw.textbbox((0, 0), text_left, font=TEXT_FONT)
+    bbox_percent = draw.textbbox((0, 0), text_percent, font=TEXT_FONT)
+    width_left = bbox_left[2] - bbox_left[0]
+    width_percent = bbox_percent[2] - bbox_percent[0]
+    total_width = width_left + width_percent
 
-    text_x = (WIDTH - text_width) / 2
-    text_y = HEIGHT - text_height - 50  # 50px from bottom
+    text_x = (WIDTH - total_width) / 2
+    text_y = HEIGHT - (bbox_left[3] - bbox_left[1]) - 50  # 50px from bottom
 
-    draw.text((text_x, text_y), text, font=FONT, fill=(200, 200, 200))
+    # Draw "Xd left" in red
+    draw.text((text_x, text_y), text_left, font=TEXT_FONT, fill=(255, 0, 0))
+    # Draw "• Y%" in grey, right next to it
+    draw.text((text_x + width_left, text_y), text_percent, font=TEXT_FONT, fill=(200, 200, 200))
 
-    # Convert to PNG response
+    # Convert image to PNG response
     buf = BytesIO()
     img.save(buf, format="PNG")
     buf.seek(0)
