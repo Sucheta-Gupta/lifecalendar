@@ -14,9 +14,10 @@ DOT_RADIUS = 15  # dot size
 GRID_WIDTH = 900
 GRID_HEIGHT = 1500
 
+row_height = GRID_HEIGHT / ROWS
 # Grid starts 1 row down
 GRID_X = (WIDTH - GRID_WIDTH) / 2
-GRID_Y = (HEIGHT - GRID_HEIGHT) / 2 + (GRID_HEIGHT / ROWS)  # move grid 1 row down
+GRID_Y = (HEIGHT - GRID_HEIGHT) / 2 + row_height  # move grid 1 row down
 
 # Font for bottom text same size as dots
 try:
