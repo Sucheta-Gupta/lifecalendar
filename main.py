@@ -47,9 +47,13 @@ def life_calendar():
             x = GRID_X + j * h_spacing
             y = GRID_Y + i * v_spacing  # already shifted 1 row down
 
-            color = (100, 100, 100)  # grey dot
+            # Color Logic
             if dot_index + 1 == day_of_year:
-                color = (255, 0, 0)  # today red dot
+                color = (255, 0, 0)      # Today: Bright Red
+            elif dot_index + 1 < day_of_year:
+                color = (70, 70, 70)     # Past: Light/Dim Gray
+            else:
+                color = (130, 130, 130)  # Future: Medium Gray (Standard)
 
             draw.ellipse(
                 [x - DOT_RADIUS, y - DOT_RADIUS, x + DOT_RADIUS, y + DOT_RADIUS],
