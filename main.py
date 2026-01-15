@@ -20,7 +20,7 @@ GRID_Y = (HEIGHT - GRID_HEIGHT) / 2 + (GRID_HEIGHT / ROWS)  # move grid 1 row do
 
 # Font for bottom text same size as dots
 try:
-    TEXT_FONT = ImageFont.truetype("Arial.ttf", DOT_RADIUS * 2)  # font = dot size
+    TEXT_FONT = ImageFont.truetype("Arial.ttf", DOT_RADIUS * 4)  # font = dot size
 except:
     TEXT_FONT = ImageFont.load_default()
 
