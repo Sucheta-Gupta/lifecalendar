@@ -10,17 +10,17 @@ WIDTH = 1290
 HEIGHT = 2796
 COLUMNS = 15
 ROWS = 25
-DOT_RADIUS = 15  # slightly bigger dots
+DOT_RADIUS = 15  # dot size
 GRID_WIDTH = 900
 GRID_HEIGHT = 1500
 
-# Move grid down by 1 row
+# Grid position (centered)
 GRID_X = (WIDTH - GRID_WIDTH) / 2
-GRID_Y = (HEIGHT - GRID_HEIGHT) / 2 + GRID_HEIGHT / ROWS  # shift down one row
+GRID_Y = (HEIGHT - GRID_HEIGHT) / 2  # grid stays in place
 
-# Font for bottom text
+# Font for bottom text, same size as dots
 try:
-    TEXT_FONT = ImageFont.truetype("Arial.ttf", 80)  # larger font for visibility
+    TEXT_FONT = ImageFont.truetype("Arial.ttf", DOT_RADIUS * 3)
 except:
     TEXT_FONT = ImageFont.load_default()
 
@@ -30,14 +30,14 @@ def life_calendar():
     today = date.today()
     day_of_year = today.timetuple().tm_yday  # 1 to 365
 
-    # dark neutral background
+    # Dark background
     img = Image.new("RGB", (WIDTH, HEIGHT), color=(30, 30, 30))
     draw = ImageDraw.Draw(img)
 
     h_spacing = GRID_WIDTH / (COLUMNS - 1)
     v_spacing = GRID_HEIGHT / (ROWS - 1)
 
-    # Draw the dots
+    # Draw dots
     for i in range(ROWS):
         for j in range(COLUMNS):
             dot_index = i * COLUMNS + j
@@ -62,7 +62,7 @@ def life_calendar():
     text_left = f"{days_left}d left"
     text_percent = f" • {percent_done}%"
 
-    # Measure text widths for center alignment
+    # Measure text width for center alignment
     bbox_left = draw.textbbox((0, 0), text_left, font=TEXT_FONT)
     bbox_percent = draw.textbbox((0, 0), text_percent, font=TEXT_FONT)
     width_left = bbox_left[2] - bbox_left[0]
@@ -70,14 +70,17 @@ def life_calendar():
     total_width = width_left + width_percent
 
     text_x = (WIDTH - total_width) / 2
-    text_y = HEIGHT - (bbox_left[3] - bbox_left[1]) - 50  # 50px from bottom
+
+    # Move text up by 2 rows from bottom
+    row_height = GRID_HEIGHT / ROWS
+    text_y = HEIGHT - (bbox_left[3] - bbox_left[1]) - 50 - 2 * row_height
 
     # Draw "Xd left" in red
     draw.text((text_x, text_y), text_left, font=TEXT_FONT, fill=(255, 0, 0))
-    # Draw "• Y%" in grey, right next to it
+    # Draw "• Y%" in grey
     draw.text((text_x + width_left, text_y), text_percent, font=TEXT_FONT, fill=(200, 200, 200))
 
-    # Convert image to PNG response
+    # Convert to PNG response
     buf = BytesIO()
     img.save(buf, format="PNG")
     buf.seek(0)
