@@ -61,7 +61,10 @@ def life_calendar():
     text = f"{days_left}d left • {percent_done}%"
 
     # Measure text size for center alignment
-    text_width, text_height = draw.textsize(text, font=FONT)
+    bbox = draw.textbbox((0, 0), text, font=FONT)  # returns (x0, y0, x1, y1)
+    text_width = bbox[2] - bbox[0]
+    text_height = bbox[3] - bbox[1]
+
     text_x = (WIDTH - text_width) / 2
     text_y = HEIGHT - text_height - 50  # 50px from bottom
 
