@@ -71,4 +71,4 @@ def life_calendar():
     buf = BytesIO()
     img.save(buf, format="PNG")
     buf.seek(0)
-    return Response(content=buf.getvalue(), media_type="i_
+    return Response(content=buf.getvalue(), media_type="image/png")
