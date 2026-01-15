@@ -14,13 +14,13 @@ DOT_RADIUS = 15  # dot size
 GRID_WIDTH = 900
 GRID_HEIGHT = 1500
 
-# Grid starts 1 row down from vertical center
+# Grid starts 1 row down
 GRID_X = (WIDTH - GRID_WIDTH) / 2
-GRID_Y = (HEIGHT - GRID_HEIGHT) / 2 + (GRID_HEIGHT / ROWS)  # 1 row down
+GRID_Y = (HEIGHT - GRID_HEIGHT) / 2 + (GRID_HEIGHT / ROWS)  # move grid 1 row down
 
-# Font for bottom text, bigger so it matches dot size
+# Font for bottom text same size as dots
 try:
-    TEXT_FONT = ImageFont.truetype("Arial.ttf", DOT_RADIUS * 4)  # make it bigger than dot radius
+    TEXT_FONT = ImageFont.truetype("Arial.ttf", DOT_RADIUS * 2)  # font = dot size
 except:
     TEXT_FONT = ImageFont.load_default()
 
@@ -45,7 +45,7 @@ def life_calendar():
                 continue
 
             x = GRID_X + j * h_spacing
-            y = GRID_Y + i * v_spacing
+            y = GRID_Y + i * v_spacing  # already shifted 1 row down
 
             color = (100, 100, 100)  # grey dot
             if dot_index + 1 == day_of_year:
