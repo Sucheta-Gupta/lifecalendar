@@ -1,64 +1,51 @@
-from fastapi import FastAPI
-from fastapi.responses import Response
+from fastapi import FastAPI, Response
 from PIL import Image, ImageDraw
+from io import BytesIO
 from datetime import date
-import io
 
 app = FastAPI()
 
+# iPhone 17 Pro wallpaper size
+WIDTH = 1290
+HEIGHT = 2796
+COLUMNS = 15
+ROWS = 25
+DOT_RADIUS = 18  # dot radius in pixels
+MARGIN_X = 50    # horizontal margin
+MARGIN_Y = 100   # vertical margin
 
 @app.get("/calendar")
 def life_calendar():
-    # ===== Canvas (iPhone Pro wallpaper) =====
-    WIDTH = 1179
-    HEIGHT = 2556
+    today = date.today()
+    day_of_year = today.timetuple().tm_yday  # 1 to 365
 
-    # ===== Colors =====
-    BG_COLOR = "#0f0f10"
-    DOT_GREY = "#3a3a3c"
-    DOT_RED = "#ff3b30"
-
-    # ===== Grid config (life calendar style) =====
-    DAYS = 365
-    COLS = 15
-    DOT_SIZE = 8
-    GAP = 14
-
-    # ===== Create image =====
-    img = Image.new("RGB", (WIDTH, HEIGHT), BG_COLOR)
+    # create white background
+    img = Image.new("RGB", (WIDTH, HEIGHT), color=(255, 255, 255))
     draw = ImageDraw.Draw(img)
 
-    rows = (DAYS + COLS - 1) // COLS
+    h_spacing = (WIDTH - 2*MARGIN_X) / (COLUMNS - 1)
+    v_spacing = (HEIGHT - 2*MARGIN_Y) / (ROWS - 1)
 
-    grid_width = COLS * DOT_SIZE + (COLS - 1) * GAP
-    grid_height = rows * DOT_SIZE + (rows - 1) * GAP
+    for i in range(ROWS):
+        for j in range(COLUMNS):
+            dot_index = i * COLUMNS + j
+            if dot_index >= 365:
+                continue
 
-    start_x = (WIDTH - grid_width) // 2
-    start_y = 420  # top padding like original
+            x = MARGIN_X + j * h_spacing
+            y = MARGIN_Y + i * v_spacing
 
-    # ===== Today dot =====
-    today = date.today()
-    start_of_year = date(today.year, 1, 1)
-    today_index = (today - start_of_year).days
+            color = (200, 200, 200)  # grey dot
+            if dot_index + 1 == day_of_year:
+                color = (255, 0, 0)  # today red dot
 
-    # ===== Draw dots =====
-    for day in range(DAYS):
-        row = day // COLS
-        col = day % COLS
+            draw.ellipse(
+                [x-DOT_RADIUS, y-DOT_RADIUS, x+DOT_RADIUS, y+DOT_RADIUS],
+                fill=color
+            )
 
-        x = start_x + col * (DOT_SIZE + GAP)
-        y = start_y + row * (DOT_SIZE + GAP)
-
-        color = DOT_RED if day == today_index else DOT_GREY
-
-        draw.ellipse(
-            (x, y, x + DOT_SIZE, y + DOT_SIZE),
-            fill=color
-        )
-
-    # ===== Output =====
-    buf = io.BytesIO()
+    # save image to response
+    buf = BytesIO()
     img.save(buf, format="PNG")
     buf.seek(0)
-
-    return Response(buf.getvalue(), media_type="image/png")
+    return Response(content=buf.getvalue(), media_type="image/png")
