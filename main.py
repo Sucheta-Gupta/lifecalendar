@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Response
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
 from datetime import date
 
@@ -10,11 +10,20 @@ WIDTH = 1290
 HEIGHT = 2796
 COLUMNS = 15
 ROWS = 25
-DOT_RADIUS = 12  # small dot
-GRID_WIDTH = 900  # total width of dot grid
-GRID_HEIGHT = 1500  # total height of dot grid
-GRID_X = (WIDTH - GRID_WIDTH) / 2  # center horizontally
-GRID_Y = (HEIGHT - GRID_HEIGHT) / 2  # center vertically
+DOT_RADIUS = 15  # slightly bigger
+GRID_WIDTH = 900
+GRID_HEIGHT = 1500
+
+# Move grid down by 1 row
+GRID_X = (WIDTH - GRID_WIDTH) / 2
+GRID_Y = (HEIGHT - GRID_HEIGHT) / 2 + GRID_HEIGHT / ROWS  # move down by 1 row height
+
+# Font setup (Pillow default if no .ttf available)
+try:
+    FONT = ImageFont.truetype("Arial.ttf", 50)
+except:
+    FONT = ImageFont.load_default()
+
 
 @app.get("/calendar")
 def life_calendar():
@@ -39,14 +48,27 @@ def life_calendar():
 
             color = (100, 100, 100)  # grey dot
             if dot_index + 1 == day_of_year:
-                color = (255, 0, 0)  # today red dot
+                color = (255, 0, 0)  # red dot for today
 
             draw.ellipse(
                 [x - DOT_RADIUS, y - DOT_RADIUS, x + DOT_RADIUS, y + DOT_RADIUS],
                 fill=color
             )
 
+    # Add bottom text: "Xd left • Y%"
+    days_left = 365 - day_of_year
+    percent_done = int(day_of_year / 365 * 100)
+    text = f"{days_left}d left • {percent_done}%"
+
+    # Measure text size for center alignment
+    text_width, text_height = draw.textsize(text, font=FONT)
+    text_x = (WIDTH - text_width) / 2
+    text_y = HEIGHT - text_height - 50  # 50px from bottom
+
+    draw.text((text_x, text_y), text, font=FONT, fill=(200, 200, 200))
+
+    # Convert to PNG response
     buf = BytesIO()
     img.save(buf, format="PNG")
     buf.seek(0)
-    return Response(content=buf.getvalue(), media_type="image/png")
+    return Response(content=buf.getvalue(), media_type="i_
